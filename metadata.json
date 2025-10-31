@@ -1,0 +1,5 @@
+{
+  "name": "Türkçe Klavye Ustalığı",
+  "description": "Yazma hızınızı ölçen ve Türkçe imla kurallarınıza göre size puan veren bir yazma alıştırma uygulaması. Gemini API ile güçlendirilmiştir.",
+  "requestFramePermissions": []
+}
