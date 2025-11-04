@@ -1,5 +1,7 @@
 {
-  "name": "Türkçe Klavye Ustalığı",
-  "description": "Yazma hızınızı ölçen ve Türkçe imla kurallarınıza göre size puan veren bir yazma alıştırma uygulaması. Gemini API ile güçlendirilmiştir.",
-  "requestFramePermissions": []
+  "name": "Yazım Doktoru",
+  "description": "Yazma becerilerinizi ölçen ve Türkçe imla ve noktalama kurallarınıza göre size puan veren bir yazma alıştırma uygulaması. Gemini API ile güçlendirilmiştir.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

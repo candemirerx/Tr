@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { TypingStats } from '../types';
 
@@ -7,25 +6,25 @@ interface StatsDisplayProps {
   grammarScore?: number;
 }
 
-const StatItem: React.FC<{ label: string; value: string | number; unit?: string; className?: string }> = ({ label, value, unit, className }) => (
-  <div className={`flex justify-between items-baseline p-4 rounded-lg bg-slate-700/50 ${className}`}>
-    <span className="text-slate-300">{label}</span>
-    <p className="text-2xl font-bold">
-      {value} <span className="text-lg text-slate-400">{unit}</span>
+const StatItem: React.FC<{ label: string; value: string | number; unit?: string }> = ({ label, value, unit }) => (
+  <div className="flex flex-col items-center justify-center p-2.5 bg-slate-800 rounded-lg shadow-md">
+    <span className="text-xs text-slate-400 uppercase tracking-wider">{label}</span>
+    <p className="text-lg font-semibold text-white">
+      {value} <span className="text-base font-normal text-slate-400">{unit}</span>
     </p>
   </div>
 );
 
 export const StatsDisplay: React.FC<StatsDisplayProps> = ({ stats, grammarScore }) => {
   return (
-    <div className="w-full bg-slate-800 rounded-xl shadow-lg p-6 flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-center mb-2 text-blue-300">Sonuçlar</h2>
-      <StatItem label="Hız (KPM)" value={stats.wpm} unit="kelime/dk" className="text-emerald-300"/>
-      <StatItem label="Doğruluk" value={stats.accuracy} unit="%" className="text-yellow-300" />
-      <StatItem label="Süre" value={stats.time} unit="sn" className="text-cyan-300" />
-      {grammarScore !== undefined && (
-         <StatItem label="İmla Puanı" value={grammarScore} unit="/100" className="text-violet-300" />
-      )}
+    <div className="w-full flex flex-col items-center gap-3">
+        <div className="flex flex-wrap justify-center gap-3">
+            <StatItem label="Hız" value={stats.wpm} unit="kpm" />
+            <StatItem label="Süre" value={stats.time} unit="sn" />
+            {grammarScore !== undefined && (
+                <StatItem label="Puan" value={grammarScore} unit="/100" />
+            )}
+        </div>
     </div>
   );
 };
