@@ -16,6 +16,7 @@ interface TypingAreaProps {
   isTranslating: boolean;
   onEnhancePrompt: () => void;
   isEnhancingPrompt: boolean;
+  onToggleCanvasEditor: () => void;
   onFinish: () => void;
   onReset: () => void;
   isFinishDisabled: boolean;
@@ -59,6 +60,10 @@ const TranslateIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 
 const WandIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.21 1.21 0 0 0 1.72 0L21.64 5.36a1.21 1.21 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 3v4"/><path d="M17 10h4"/><path d="M21 7h-4"/></svg>
+);
+
+const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648 0 .926-.746 1.648-1.648 1.648s-1.648-.746-1.648-1.648S8.5 18 8.5 18s-1.648.746-1.648 1.648S6 21 6 21s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648S2 22 2 22s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648S12 22 12 22s1.648.746 1.648 1.648 1.648-.746 1.648-1.648 1.648.746 1.648 1.648 1.648-.746 1.648-1.648S22 12 22 12s-.746-1.648-1.648-1.648-1.648.746-1.648 1.648-1.648.746-1.648 1.648-1.648-.746-1.648-1.648S12 2 12 2Z"/></svg>
 );
 
 const PencilIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -122,6 +127,7 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
     isTranslating,
     onEnhancePrompt,
     isEnhancingPrompt,
+    onToggleCanvasEditor,
     onFinish,
     onReset,
     isFinishDisabled,
@@ -298,7 +304,7 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
                         </div>
                     )}
                 </button>
-                <button
+                 <button
                     onClick={onTranslate}
                     onMouseDown={(e) => e.preventDefault()}
                     disabled={status === 'finished' || isTranslating || userInput.trim().length === 0 || isPaused}
@@ -316,7 +322,16 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
                         </div>
                     )}
                 </button>
-
+                <button
+                    onClick={onToggleCanvasEditor}
+                    onMouseDown={(e) => e.preventDefault()}
+                    disabled={status === 'finished' || userInput.trim().length === 0 || isPaused}
+                    className="relative p-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Kanvas Modu"
+                    aria-label="Metni görsel olarak düzenlemek için kanvası aç"
+                >
+                    <PaletteIcon className="w-5 h-5" />
+                </button>
                 <div className="flex items-center rounded-lg bg-slate-700">
                     <button
                         onClick={onUndo}
