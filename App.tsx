@@ -604,7 +604,7 @@ const App: React.FC = () => {
         {grammarFeedback?.summary ? (
           <p className="italic max-w-2xl mx-auto">"{grammarFeedback.summary}"</p>
         ) : (
-          <p>Yazım Doktoru - Gemini API ile Güçlendirilmiştir</p>
+          null
         )}
       </footer>
       <SettingsModal 
