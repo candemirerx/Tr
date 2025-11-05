@@ -4,6 +4,7 @@ import { StatsDisplay } from './components/StatsDisplay';
 import { AnalysisCard } from './components/AnalysisCard';
 import { Header } from './components/Header';
 import { SettingsModal, SettingsData } from './components/SettingsModal';
+import { CanvasEditorModal } from './components/CanvasEditorModal';
 // FIX: Alias the imported `translateToEnglish` function to `translateTextToEnglish`
 // to resolve a name conflict with the component's state variable of the same name.
 // ADD: Import the new translateToTurkish function for back-translation.
@@ -62,6 +63,7 @@ const App: React.FC = () => {
 
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
   const [isEnhancingPrompt, setIsEnhancingPrompt] = useState<boolean>(false);
+  const [isCanvasEditorOpen, setIsCanvasEditorOpen] = useState<boolean>(false);
   
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const cursorPositionRef = useRef<number | null>(null);
@@ -556,6 +558,7 @@ const App: React.FC = () => {
                     isTranslating={isTranslating}
                     onEnhancePrompt={handleEnhancePrompt}
                     isEnhancingPrompt={isEnhancingPrompt}
+                    onToggleCanvasEditor={() => setIsCanvasEditorOpen(true)}
                     onFinish={finishTest}
                     onReset={resetTest}
                     isFinishDisabled={status !== 'typing' || userInput.trim().length === 0}
@@ -603,9 +606,7 @@ const App: React.FC = () => {
        <footer className="w-full max-w-4xl mx-auto text-center py-8 mt-auto text-slate-500">
         {grammarFeedback?.summary ? (
           <p className="italic max-w-2xl mx-auto">"{grammarFeedback.summary}"</p>
-        ) : (
-          <p>Yazım Doktoru - Gemini API ile Güçlendirilmiştir</p>
-        )}
+        ) : null}
       </footer>
       <SettingsModal 
         isOpen={isSettingsOpen}
@@ -619,6 +620,11 @@ const App: React.FC = () => {
         initialEnhancementLevel={enhancementLevel}
         initialForceRoleContext={forceRoleContext}
         initialAiModelPreference={aiModelPreference}
+      />
+      <CanvasEditorModal
+        isOpen={isCanvasEditorOpen}
+        onClose={() => setIsCanvasEditorOpen(false)}
+        initialText={userInput}
       />
     </div>
   );
