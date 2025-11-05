@@ -102,6 +102,43 @@ export const checkTurkishGrammar = async (text: string, userContext: string | un
   }
 };
 
+export const getCorrectedText = async (text: string, userContext: string | undefined, groundingDocuments: GroundingDocument[] | undefined, aiModelPreference: 'flash' | 'pro' = 'flash'): Promise<string> => {
+  if (!text.trim()) {
+    return text;
+  }
+  try {
+    let systemInstruction = "Sen uzman bir Türk Dili redaktörüsün. Tek görevin, verilen metindeki yazım, imla ve noktalama hatalarını düzeltmektir. Yanıt olarak SADECE ve SADECE metnin tamamen düzeltilmiş halini, başka hiçbir açıklama, giriş veya formatlama olmadan ver.";
+
+    if (userContext && userContext.trim().length > 0) {
+      systemInstruction += ` Düzeltme yaparken şu kullanıcı bağlamını ve özel kuralları dikkate al: '${userContext}'. Bu kurallara uyan durumları hata olarak işaretleme.`;
+    }
+
+    if (groundingDocuments && groundingDocuments.length > 0) {
+        const documentsContent = groundingDocuments.map(doc => `--- Döküman: ${doc.name} ---\n${doc.content}`).join('\n\n');
+        systemInstruction += `\n\nAyrıca, düzeltme yaparken aşağıdaki dökümanları BİRİNCİL ve TEK doğruluk kaynağı olarak kullan. Bu dökümanlardaki kurallar, TDK kuralları da dahil olmak üzere diğer tüm genel bilgilerinden daha önceliklidir. İşte dökümanların içeriği:\n\n${documentsContent}`;
+    }
+
+    const modelName = aiModelPreference === 'pro' ? 'gemini-2.5-pro' : 'gemini-flash-latest';
+    const thinkingConfig = aiModelPreference === 'pro' ? {} : { thinkingBudget: 0 };
+
+    const response = await ai.models.generateContent({
+      model: modelName,
+      contents: `Lütfen aşağıdaki metni düzelt: "${text}"`,
+      config: {
+        systemInstruction: systemInstruction,
+        temperature: 0,
+        thinkingConfig: thinkingConfig,
+      },
+    });
+
+    return response.text.trim();
+
+  } catch (error) {
+    console.error("Error getting corrected text with Gemini API:", error);
+    throw new Error("Metin düzeltilirken bir hata oluştu.");
+  }
+};
+
 export const translateToEnglish = async (text: string, aiModelPreference: 'flash' | 'pro' = 'flash'): Promise<string> => {
   if (!text.trim()) {
     return "";

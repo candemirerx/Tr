@@ -9,7 +9,8 @@ import { CanvasEditorModal } from './components/CanvasEditorModal';
 // to resolve a name conflict with the component's state variable of the same name.
 // ADD: Import the new translateToTurkish function for back-translation.
 // ADD: Import the new enhancePrompt function.
-import { checkTurkishGrammar, translateToEnglish as translateTextToEnglish, translateToTurkish, enhancePrompt, detectLanguage } from './services/geminiService';
+// ADD: Import the new getCorrectedText function for faster auto-correction.
+import { checkTurkishGrammar, translateToEnglish as translateTextToEnglish, translateToTurkish, enhancePrompt, detectLanguage, getCorrectedText } from './services/geminiService';
 // FIX: Import SpeechRecognitionEvent and SpeechRecognitionErrorEvent to resolve missing type errors.
 import type { TestStatus, TypingStats, GrammarFeedback, GroundingDocument, SpeechRecognitionEvent, SpeechRecognitionErrorEvent } from './types';
 
@@ -189,10 +190,10 @@ const App: React.FC = () => {
     setError(null);
     try {
       pushToHistory(userInputRef.current);
-      const feedback = await checkTurkishGrammar(userInputRef.current, userContextRef.current, groundingDocumentsRef.current, aiModelPreference);
-      if (feedback?.correctedText) {
-          setUserInput(feedback.correctedText);
-          pushToHistory(feedback.correctedText);
+      const correctedText = await getCorrectedText(userInputRef.current, userContextRef.current, groundingDocumentsRef.current, aiModelPreference);
+      if (correctedText) {
+          setUserInput(correctedText);
+          pushToHistory(correctedText);
       }
     } catch (err) {
       setError("Metin düzeltilirken bir hata oluştu.");
