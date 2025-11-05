@@ -29,6 +29,7 @@ interface TypingAreaProps {
   onManualCorrect: () => void;
   isManualCorrecting: boolean;
   onPauseResume: () => void;
+  isAiEnabled: boolean;
 }
 
 const CopyIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -63,7 +64,7 @@ const WandIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
 );
 
 const PaletteIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648 0 .926-.746 1.648-1.648 1.648s-1.648-.746-1.648-1.648S8.5 18 8.5 18s-1.648.746-1.648 1.648S6 21 6 21s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648S2 22 2 22s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648S12 22 12 22s1.648.746 1.648 1.648 1.648-.746 1.648-1.648 1.648.746 1.648 1.648 1.648-.746 1.648-1.648S22 12 22 12s-.746-1.648-1.648-1.648-1.648.746-1.648 1.648-1.648.746-1.648 1.648-1.648-.746-1.648-1.648S12 2 12 2Z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648 0 .926-.746 1.648-1.648 1.648s-1.648-.746-1.648-1.648S8.5 18 8.5 18s-1.648.746-1.648 1.648S6 21 6 21s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648S2 22 2 22s-1.648.746-1.648 1.648-1.648-.746-1.648-1.648-1.648.746-1.648 1.648c0 .926.746 1.648 1.648 1.648.926 0 1.648-.746 1.648-1.648 0-.926-.746-1.648-1.648-1.648s-1.648.746-1.648 1.648S12 22 12 22s1.648.746 1.648 1.648 1.648-.746 1.648-1.648 1.648.746 1.648 1.648 1.648-.746 1.648-1.648S22 12 22 12s-.746-1.648-1.648-1.648-1.648.746-1.648 1.648-1.648.746-1.648 1.648-1.648-.746-1.648-1.648S12 2 12 2Z"/></svg>
 );
 
 const PencilIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -139,7 +140,8 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
     isCopied,
     onManualCorrect,
     isManualCorrecting,
-    onPauseResume
+    onPauseResume,
+    isAiEnabled
 }, ref) => {
 
   useEffect(() => {
@@ -227,7 +229,7 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
                                 }
                             }}
                             onMouseDown={(e) => e.preventDefault()}
-                            disabled={status === 'finished' || isManualCorrecting || isPaused}
+                            disabled={!isAiEnabled || status === 'finished' || isManualCorrecting || isPaused}
                             className={`relative p-2.5 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed ${
                                 autoCorrect
                                 ? 'bg-blue-600 text-white'
@@ -289,7 +291,7 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
                 <button
                     onClick={onEnhancePrompt}
                     onMouseDown={(e) => e.preventDefault()}
-                    disabled={status === 'finished' || isEnhancingPrompt || userInput.trim().length === 0 || isPaused}
+                    disabled={!isAiEnabled || status === 'finished' || isEnhancingPrompt || userInput.trim().length === 0 || isPaused}
                     className="relative p-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Prompt'u Geliştir"
                     aria-label="Yazdığınız prompt'u yapay zeka için geliştirir"
@@ -307,7 +309,7 @@ export const TypingArea = forwardRef<HTMLTextAreaElement, TypingAreaProps>(({
                  <button
                     onClick={onTranslate}
                     onMouseDown={(e) => e.preventDefault()}
-                    disabled={status === 'finished' || isTranslating || userInput.trim().length === 0 || isPaused}
+                    disabled={!isAiEnabled || status === 'finished' || isTranslating || userInput.trim().length === 0 || isPaused}
                     className="relative p-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     title="Metni Çevir"
                     aria-label="Metni otomatik olarak İngilizce veya Türkçe'ye çevirir"

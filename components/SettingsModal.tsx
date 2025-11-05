@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import type { GroundingDocument } from '../types';
 
@@ -12,6 +10,7 @@ export interface SettingsData {
     enhancementLevel: number;
     forceRoleContext: boolean;
     aiModelPreference: 'flash' | 'pro';
+    isAiEnabled: boolean;
 }
 
 interface SettingsModalProps {
@@ -26,6 +25,7 @@ interface SettingsModalProps {
   initialEnhancementLevel: number;
   initialForceRoleContext: boolean;
   initialAiModelPreference: 'flash' | 'pro';
+  initialIsAiEnabled: boolean;
 }
 
 declare global {
@@ -67,11 +67,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     initialDictationTimeout,
     initialEnhancementLevel,
     initialForceRoleContext,
-    initialAiModelPreference
+    initialAiModelPreference,
+    initialIsAiEnabled
 }) => {
   const [context, setContext] = useState(initialContext);
   const [documents, setDocuments] = useState<GroundingDocument[]>(initialGroundingDocuments);
-  const [activeTab, setActiveTab] = useState<'context' | 'training' | 'dictation' | 'prompt' | 'yapay-zeka'>('context');
+  const [activeTab, setActiveTab] = useState<'context' | 'training' | 'dictation' | 'prompt' | 'api'>('context');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [defaultAutoCorrect, setDefaultAutoCorrect] = useState(initialDefaultAutoCorrect);
@@ -81,7 +82,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [enhancementLevel, setEnhancementLevel] = useState(initialEnhancementLevel);
   const [forceRoleContext, setForceRoleContext] = useState(initialForceRoleContext);
   const [aiModelPreference, setAiModelPreference] = useState(initialAiModelPreference);
+  const [isAiEnabled, setIsAiEnabled] = useState(initialIsAiEnabled);
 
+  const apiKeyExists = !!process.env.API_KEY;
 
   useEffect(() => {
     if (isOpen) {
@@ -93,8 +96,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       setEnhancementLevel(initialEnhancementLevel);
       setForceRoleContext(initialForceRoleContext);
       setAiModelPreference(initialAiModelPreference);
+      setIsAiEnabled(initialIsAiEnabled);
     }
-  }, [isOpen, initialContext, initialGroundingDocuments, initialDefaultAutoCorrect, initialDefaultPersistentDictation, initialDictationTimeout, initialEnhancementLevel, initialForceRoleContext, initialAiModelPreference]);
+  }, [isOpen, initialContext, initialGroundingDocuments, initialDefaultAutoCorrect, initialDefaultPersistentDictation, initialDictationTimeout, initialEnhancementLevel, initialForceRoleContext, initialAiModelPreference, initialIsAiEnabled]);
 
   if (!isOpen) return null;
 
@@ -107,7 +111,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         dictationTimeout,
         enhancementLevel,
         forceRoleContext,
-        aiModelPreference
+        aiModelPreference,
+        isAiEnabled
     });
   };
   
@@ -193,7 +198,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <TabButton active={activeTab === 'training'} onClick={() => setActiveTab('training')}>Yapay Zeka Eğitimi</TabButton>
                 <TabButton active={activeTab === 'dictation'} onClick={() => setActiveTab('dictation')}>Dikte</TabButton>
                 <TabButton active={activeTab === 'prompt'} onClick={() => setActiveTab('prompt')}>Prompt Geliştirme</TabButton>
-                <TabButton active={activeTab === 'yapay-zeka'} onClick={() => setActiveTab('yapay-zeka')}>Yapay Zeka</TabButton>
+                <TabButton active={activeTab === 'api'} onClick={() => setActiveTab('api')}>Yapay Zeka &amp; API</TabButton>
             </div>
         </div>
         
@@ -325,9 +330,47 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                 </div>
             )}
-            {activeTab === 'yapay-zeka' && (
+            {activeTab === 'api' && (
                 <div>
-                    <h3 className="text-lg font-semibold text-slate-200 mb-4">Yapay Zeka Motoru Seçimi</h3>
+                    <h3 className="text-lg font-semibold text-slate-200 mb-4">Genel Yapay Zeka Ayarları</h3>
+                    <div className="space-y-4 p-4 bg-slate-700/50 rounded-lg">
+                        <label htmlFor="enable-ai-toggle" className="flex items-center justify-between cursor-pointer">
+                            <span className="text-sm text-slate-300">Yapay Zeka Özelliklerini Aktifleştir</span>
+                            <div className="relative">
+                                <input type="checkbox" id="enable-ai-toggle" className="sr-only peer" checked={isAiEnabled} onChange={(e) => setIsAiEnabled(e.target.checked)} disabled={!apiKeyExists} />
+                                <div className="block w-9 h-5 rounded-full bg-slate-600 peer-checked:bg-blue-600 peer-disabled:bg-slate-800 peer-disabled:cursor-not-allowed transition-colors"></div>
+                                <div className="dot absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-full peer-disabled:bg-slate-500"></div>
+                            </div>
+                        </label>
+                        {!apiKeyExists && (
+                            <p className="text-xs text-yellow-400">
+                                API anahtarı yapılandırılmadığı için yapay zeka özellikleri kullanılamıyor. Lütfen ortam değişkenlerini kontrol edin.
+                            </p>
+                        )}
+                        {apiKeyExists && (
+                            <p className="text-xs text-slate-400">
+                                Uygulamadaki tüm yapay zeka destekli özellikleri (analiz, çeviri, düzeltme vb.) açar veya kapatır.
+                            </p>
+                        )}
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-slate-200 mt-6 mb-4">API Anahtarı</h3>
+                    <div className="space-y-2">
+                        <label htmlFor="api-key-input" className="block text-sm text-slate-300">Google AI API Anahtarı</label>
+                        <input
+                            type="password"
+                            id="api-key-input"
+                            value="********"
+                            placeholder="API anahtarınızı buraya yapıştırın..."
+                            disabled
+                            className="w-full p-2 bg-slate-900 border-2 border-slate-700 rounded-lg text-slate-400 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                        <p className="text-xs text-slate-400">
+                            Not: Güvenlik ve platform kuralları gereği, API anahtarı sistem tarafından merkezi olarak yönetilmekte ve bu arayüzden değiştirilememektedir.
+                        </p>
+                    </div>
+
+                    <h3 className="text-lg font-semibold text-slate-200 mt-6 mb-4">Yapay Zeka Motoru Seçimi</h3>
                     <p className="text-sm text-slate-400 mb-4">
                         Uygulamanın genelinde kullanılacak yapay zeka modelini seçin. Hız ve kalite arasında bir denge kurun.
                     </p>

@@ -60,6 +60,7 @@ const App: React.FC = () => {
   const [enhancementLevel, setEnhancementLevel] = useState<number>(0);
   const [forceRoleContext, setForceRoleContext] = useState<boolean>(false);
   const [aiModelPreference, setAiModelPreference] = useState<'flash' | 'pro'>('flash');
+  const [isAiEnabled, setIsAiEnabled] = useState<boolean>(false);
 
 
   const [isTranslating, setIsTranslating] = useState<boolean>(false);
@@ -178,6 +179,11 @@ const App: React.FC = () => {
       if (savedAiPref === 'pro' || savedAiPref === 'flash') {
         setAiModelPreference(savedAiPref);
       }
+      
+      const savedAiEnabled = localStorage.getItem('isAiEnabled');
+      if (savedAiEnabled) {
+          setIsAiEnabled(JSON.parse(savedAiEnabled));
+      }
 
     } catch (error) {
         console.error("Failed to parse settings from localStorage", error);
@@ -185,7 +191,7 @@ const App: React.FC = () => {
   }, []);
 
   const handleAutoCorrection = useCallback(async () => {
-    if (userInputRef.current.trim().length === 0 || isManualCorrecting) return;
+    if (!isAiEnabled || userInputRef.current.trim().length === 0 || isManualCorrecting) return;
     setIsManualCorrecting(true);
     setError(null);
     try {
@@ -201,7 +207,7 @@ const App: React.FC = () => {
     } finally {
         setIsManualCorrecting(false);
     }
-  }, [pushToHistory, isManualCorrecting, aiModelPreference]);
+  }, [pushToHistory, isManualCorrecting, aiModelPreference, isAiEnabled]);
 
   const stopDictationWithInactivityTimer = useCallback(() => {
     if (isDictatingRef.current) {
@@ -372,6 +378,8 @@ const App: React.FC = () => {
     setAiModelPreference(settings.aiModelPreference);
     localStorage.setItem('aiModelPreference', settings.aiModelPreference);
 
+    setIsAiEnabled(settings.isAiEnabled);
+    localStorage.setItem('isAiEnabled', JSON.stringify(settings.isAiEnabled));
 
     setIsSettingsOpen(false);
   };
@@ -434,7 +442,7 @@ const App: React.FC = () => {
   }, [userInput]);
 
   const handleTranslation = useCallback(async () => {
-    if (userInput.trim().length === 0) return;
+    if (!isAiEnabled || userInput.trim().length === 0) return;
 
     pushToHistory(userInput);
     setIsTranslating(true);
@@ -463,10 +471,10 @@ const App: React.FC = () => {
     } finally {
         setIsTranslating(false);
     }
-}, [userInput, pushToHistory, handleUndo, aiModelPreference]);
+}, [userInput, pushToHistory, handleUndo, aiModelPreference, isAiEnabled]);
 
   const handleEnhancePrompt = useCallback(async () => {
-    if (userInput.trim().length === 0) return;
+    if (!isAiEnabled || userInput.trim().length === 0) return;
 
     pushToHistory(userInput);
     setIsEnhancingPrompt(true);
@@ -481,7 +489,7 @@ const App: React.FC = () => {
     } finally {
         setIsEnhancingPrompt(false);
     }
-  }, [userInput, pushToHistory, enhancementLevel, forceRoleContext, aiModelPreference]);
+  }, [userInput, pushToHistory, enhancementLevel, forceRoleContext, aiModelPreference, isAiEnabled]);
 
   const handlePauseResume = useCallback(() => {
     if (status === 'typing' && startTime) {
@@ -523,6 +531,12 @@ const App: React.FC = () => {
       time: parseFloat(elapsedTime.toFixed(2)),
     });
 
+    if (!isAiEnabled) {
+        setGrammarFeedback(null);
+        setIsLoading(false);
+        return;
+    }
+
     setIsLoading(true);
     setError(null);
     setGrammarFeedback(null);
@@ -535,7 +549,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [status, startTime, userInput, userContext, groundingDocuments, isDictating, pushToHistory, aiModelPreference, accumulatedTime]);
+  }, [status, startTime, userInput, userContext, groundingDocuments, isDictating, pushToHistory, aiModelPreference, accumulatedTime, isAiEnabled]);
 
   return (
     <div className="min-h-screen bg-slate-900 font-sans flex flex-col items-center p-4 sm:p-8">
@@ -572,6 +586,7 @@ const App: React.FC = () => {
                     onManualCorrect={handleAutoCorrection}
                     isManualCorrecting={isManualCorrecting}
                     onPauseResume={handlePauseResume}
+                    isAiEnabled={isAiEnabled}
                   />
           </div>
         ) : (
@@ -600,7 +615,24 @@ const App: React.FC = () => {
                 <StatsDisplay stats={stats} grammarScore={grammarFeedback.score} />
                 <AnalysisCard userInput={history.stack[history.index -1] || userInput} feedback={grammarFeedback} />
               </>
-            ) : null}
+            ) : (
+                <>
+                <div className="w-full flex justify-between items-center">
+                     <div/>
+                    <button
+                        onClick={resetTest}
+                        className="px-5 py-2 text-base font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors"
+                    >
+                        Yeni Analiz
+                    </button>
+                </div>
+                <StatsDisplay stats={stats} />
+                <div className="w-full bg-slate-800 rounded-xl shadow-lg p-5 text-center">
+                    <h3 className="text-lg font-bold mb-2 text-blue-300">Analiz Tamamlandı</h3>
+                    <p className="text-slate-400">Yapay zeka özellikleri devre dışı bırakıldığı için dil bilgisi analizi yapılmadı.</p>
+                </div>
+              </>
+            )}
           </div>
         )}
       </main>
@@ -621,6 +653,7 @@ const App: React.FC = () => {
         initialEnhancementLevel={enhancementLevel}
         initialForceRoleContext={forceRoleContext}
         initialAiModelPreference={aiModelPreference}
+        initialIsAiEnabled={isAiEnabled}
       />
       <CanvasEditorModal
         isOpen={isCanvasEditorOpen}
